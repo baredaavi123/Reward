@@ -1,0 +1,17 @@
+{
+  "name": "Reward - Zewar For You",
+  "short_name": "Reward",
+  "description": "Customer Reward & Loyalty Khata Portal",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#FAF9F6",
+  "theme_color": "#d97706",
+  "icons": [
+    {
+      "src": "/Logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
