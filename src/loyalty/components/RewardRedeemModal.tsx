@@ -159,7 +159,3 @@ export const RewardRedeemModal: React.FC<RewardRedeemModalProps> = ({
     </div>
   );
 };
-
-// Backwards-compatible alias
-export const CreditPointRedeemModal = RewardRedeemModal;
-export type CreditPointRedeemModalProps = RewardRedeemModalProps;

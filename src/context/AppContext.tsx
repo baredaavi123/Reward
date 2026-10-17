@@ -8,6 +8,7 @@ import {
   saveStoredCustomers,
   saveStoredSettings,
   saveStoredTransactions,
+  clearAllStorageData,
 } from '../utils/storage';
 
 interface AppContextType {
@@ -30,6 +31,7 @@ interface AppContextType {
   deleteTransaction: (id: string) => void;
   adjustCustomerPoints: (customerId: string, newPoints: number, reason: string) => void;
   updateSettings: (newSettings: LoyaltySettings) => void;
+  clearAllData: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -182,6 +184,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSettings(newSettings);
   };
 
+  const clearAllData = () => {
+    setCustomers([]);
+    setTransactions([]);
+    setSelectedCustomerId(null);
+    clearAllStorageData();
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -197,6 +206,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteTransaction,
         adjustCustomerPoints,
         updateSettings,
+        clearAllData,
       }}
     >
       {children}

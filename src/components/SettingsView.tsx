@@ -1,14 +1,14 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { RewardSettingsCard } from '../loyalty/components/RewardSettingsCard';
-import { BookOpen, ArrowLeft } from 'lucide-react';
+import { BookOpen, ArrowLeft, Trash2 } from 'lucide-react';
 
 interface SettingsViewProps {
   onBackToCustomers?: () => void;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({ onBackToCustomers }) => {
-  const { settings, updateSettings } = useApp();
+  const { settings, updateSettings, clearAllData } = useApp();
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -54,6 +54,31 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onBackToCustomers })
             4. <strong>Reversal on Delete:</strong> Deleting a transaction automatically restores the exact points balance.
           </p>
         </div>
+      </div>
+
+      {/* Reset / Clear All Data */}
+      <div className="bg-white rounded-2xl border border-gray-200/80 p-4.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div>
+          <h3 className="font-bold text-gray-900 text-sm flex items-center gap-1.5 text-rose-600">
+            <Trash2 className="w-4 h-4" />
+            Clear All Data
+          </h3>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Permanently wipe all customer profiles and recorded transaction bills to start with a fresh slate.
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            if (window.confirm('Are you sure you want to delete ALL customer data and transactions? This cannot be undone.')) {
+              clearAllData();
+              alert('All data has been cleared successfully.');
+            }
+          }}
+          className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl border border-rose-200 transition-all active:scale-95 flex items-center justify-center gap-1.5 shrink-0"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+          Delete All Data
+        </button>
       </div>
 
       {/* Powered by VYOMWEB & Version */}

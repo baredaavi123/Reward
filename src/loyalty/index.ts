@@ -5,6 +5,3 @@ export * from './components/CustomerLoyaltyCard';
 export * from './components/RewardRedeemModal';
 export * from './components/RewardBadge';
 export * from './components/ManualPointsAdjustModal';
-export * from './components/CreditPointSettingsCard';
-export * from './components/CreditPointRedeemModal';
-export * from './components/CreditPointBadge';

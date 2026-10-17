@@ -163,7 +163,3 @@ export const RewardSettingsCard: React.FC<RewardSettingsCardProps> = ({
     </div>
   );
 };
-
-// Backwards-compatible alias
-export const CreditPointSettingsCard = RewardSettingsCard;
-export type CreditPointSettingsCardProps = RewardSettingsCardProps;

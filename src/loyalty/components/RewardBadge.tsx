@@ -24,7 +24,3 @@ export const RewardBadge: React.FC<RewardBadgeProps> = ({
     </span>
   );
 };
-
-// Backwards-compatible alias
-export const CreditPointBadge = RewardBadge;
-export type CreditPointBadgeProps = RewardBadgeProps;

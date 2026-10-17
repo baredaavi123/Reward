@@ -7,64 +7,9 @@ const STORAGE_KEYS = {
   SETTINGS: 'reward_settings',
 };
 
-const INITIAL_CUSTOMERS: LoyaltyCustomer[] = [
-  {
-    id: 'cust-1',
-    name: 'Ashok Garg',
-    phone: '9876543210',
-    dob: '1990-05-12',
-    anniversary: '2018-11-20',
-    balance: 500,
-    loyaltyPoints: 1,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'cust-2',
-    name: 'Ramesh Garg',
-    phone: '9812345678',
-    dob: '1985-08-24',
-    anniversary: '2012-02-14',
-    balance: 2400,
-    loyaltyPoints: 6,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'cust-3',
-    name: 'Suresh Kumar',
-    phone: '9988776655',
-    dob: '1996-03-15',
-    balance: 0,
-    loyaltyPoints: 0,
-    createdAt: new Date().toISOString(),
-  },
-];
-
-const INITIAL_TRANSACTIONS: LoyaltyTransaction[] = [
-  {
-    id: 'tx-1',
-    customerId: 'cust-1',
-    amount: 500,
-    type: 'debit',
-    date: new Date().toISOString(),
-    description: 'Purchase / Dr. Entry',
-    pointsEarned: 1,
-    pointsRedeemed: 0,
-  },
-  {
-    id: 'tx-2',
-    customerId: 'cust-2',
-    amount: 3000,
-    type: 'debit',
-    date: new Date(Date.now() - 86400000 * 2).toISOString(),
-    description: 'Shopping bill',
-    pointsEarned: 6,
-    pointsRedeemed: 0,
-  },
-];
-
 export function loadStoredSettings(): LoyaltySettings {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.SETTINGS) || localStorage.getItem('credit_point_settings');
+    const raw = localStorage.getItem(STORAGE_KEYS.SETTINGS);
     if (!raw) return DEFAULT_LOYALTY_SETTINGS;
     return { ...DEFAULT_LOYALTY_SETTINGS, ...JSON.parse(raw) };
   } catch {
@@ -78,12 +23,20 @@ export function saveStoredSettings(settings: LoyaltySettings): void {
 
 export function loadStoredCustomers(): LoyaltyCustomer[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.CUSTOMERS) || localStorage.getItem('credit_point_customers');
-    if (!raw) return INITIAL_CUSTOMERS;
+    const raw = localStorage.getItem(STORAGE_KEYS.CUSTOMERS);
+    if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : INITIAL_CUSTOMERS;
+    if (!Array.isArray(parsed)) return [];
+    // Purge old mock data if present in user storage
+    const cleaned = parsed.filter(
+      (c: LoyaltyCustomer) => c.id !== 'cust-1' && c.id !== 'cust-2' && c.id !== 'cust-3'
+    );
+    if (cleaned.length !== parsed.length) {
+      saveStoredCustomers(cleaned);
+    }
+    return cleaned;
   } catch {
-    return INITIAL_CUSTOMERS;
+    return [];
   }
 }
 
@@ -93,15 +46,35 @@ export function saveStoredCustomers(customers: LoyaltyCustomer[]): void {
 
 export function loadStoredTransactions(): LoyaltyTransaction[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) || localStorage.getItem('credit_point_transactions');
-    if (!raw) return INITIAL_TRANSACTIONS;
+    const raw = localStorage.getItem(STORAGE_KEYS.TRANSACTIONS);
+    if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : INITIAL_TRANSACTIONS;
+    if (!Array.isArray(parsed)) return [];
+    // Purge old mock data if present in user storage
+    const cleaned = parsed.filter(
+      (t: LoyaltyTransaction) =>
+        t.id !== 'tx-1' && t.id !== 'tx-2' && t.customerId !== 'cust-1' && t.customerId !== 'cust-2'
+    );
+    if (cleaned.length !== parsed.length) {
+      saveStoredTransactions(cleaned);
+    }
+    return cleaned;
   } catch {
-    return INITIAL_TRANSACTIONS;
+    return [];
   }
 }
 
 export function saveStoredTransactions(transactions: LoyaltyTransaction[]): void {
   localStorage.setItem(STORAGE_KEYS.TRANSACTIONS, JSON.stringify(transactions));
+}
+
+export function clearAllStorageData(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.CUSTOMERS);
+    localStorage.removeItem(STORAGE_KEYS.TRANSACTIONS);
+    localStorage.removeItem('credit_point_customers');
+    localStorage.removeItem('credit_point_transactions');
+  } catch {
+    // Ignore storage errors
+  }
 }
