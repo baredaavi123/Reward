@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Phone, Edit3, Plus, ArrowLeft, Star, Gift, History, Calendar, CheckCircle2 } from 'lucide-react';
+import { Phone, Edit3, Plus, ArrowLeft, Star, Gift, History, Calendar, CheckCircle2, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { CustomerLoyaltyCard } from '../loyalty/components/CustomerLoyaltyCard';
 import { ManualPointsAdjustModal } from '../loyalty/components/ManualPointsAdjustModal';
 import { AddTransactionModal } from './AddTransactionModal';
 import { EditCustomerModal } from './EditCustomerModal';
+import { getCelebrationStatus } from '../utils/celebration';
 
 export const CustomerDetail: React.FC = () => {
   const {
@@ -14,6 +15,7 @@ export const CustomerDetail: React.FC = () => {
     setSelectedCustomerId,
     adjustCustomerPoints,
     settings,
+    markWhatsAppSent,
   } = useApp();
 
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
@@ -32,6 +34,7 @@ export const CustomerDetail: React.FC = () => {
 
   const customerTx = transactions.filter((t) => t.customerId === customer.id);
   const balance = customer.balance || 0;
+  const celebration = getCelebrationStatus(customer.dob, customer.anniversary);
 
   // Clean phone without +91
   const cleanPhone = (phone?: string) => {
@@ -47,27 +50,6 @@ export const CustomerDetail: React.FC = () => {
       return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
     return dateStr;
-  };
-
-  // Check if date matches today's month and day (Requirement 3: Pink color box)
-  const isTodayDate = (dateStr?: string) => {
-    if (!dateStr) return false;
-    const today = new Date();
-    const currentMonth = today.getMonth() + 1;
-    const currentDay = today.getDate();
-
-    if (dateStr.includes('-')) {
-      const parts = dateStr.split('-');
-      if (parts.length === 3) {
-        return parseInt(parts[1], 10) === currentMonth && parseInt(parts[2], 10) === currentDay;
-      }
-    } else if (dateStr.includes('/')) {
-      const parts = dateStr.split('/');
-      if (parts.length === 3) {
-        return parseInt(parts[1], 10) === currentMonth && parseInt(parts[0], 10) === currentDay;
-      }
-    }
-    return false;
   };
 
   // Points Gain & Use audit metrics
@@ -97,24 +79,29 @@ export const CustomerDetail: React.FC = () => {
               {customer.dob && (
                 <span
                   className={`text-[11px] flex items-center gap-1 ${
-                    isTodayDate(customer.dob)
+                    celebration.birthday.isActive
                       ? 'bg-pink-100 text-pink-800 font-bold border border-pink-300 px-2 py-0.5 rounded-md shadow-2xs'
                       : 'text-gray-500'
                   }`}
                 >
-                  <Calendar className={`w-3 h-3 ${isTodayDate(customer.dob) ? 'text-pink-600' : 'text-gray-400'}`} />
-                  DOB: {formatDateDisplay(customer.dob)}
+                  <Calendar className={`w-3 h-3 ${celebration.birthday.isActive ? 'text-pink-600' : 'text-gray-400'}`} />
+                  {celebration.birthday.isActive
+                    ? `🎂 Birthday ${celebration.birthday.timing === 'today' ? 'Today' : 'Tomorrow'}: ${celebration.birthday.formattedDisplay}`
+                    : `DOB: ${formatDateDisplay(customer.dob)}`}
                 </span>
               )}
               {customer.anniversary && (
                 <span
                   className={`text-[11px] flex items-center gap-1 ${
-                    isTodayDate(customer.anniversary)
+                    celebration.anniversary.isActive
                       ? 'bg-pink-100 text-pink-800 font-bold border border-pink-300 px-2 py-0.5 rounded-md shadow-2xs'
                       : 'text-gray-500'
                   }`}
                 >
-                  Anniv: {formatDateDisplay(customer.anniversary)}
+                  <Calendar className={`w-3 h-3 ${celebration.anniversary.isActive ? 'text-pink-600' : 'text-gray-400'}`} />
+                  {celebration.anniversary.isActive
+                    ? `💍 Anniv ${celebration.anniversary.timing === 'today' ? 'Today' : 'Tomorrow'}: ${celebration.anniversary.formattedDisplay}`
+                    : `Anniv: ${formatDateDisplay(customer.anniversary)}`}
                 </span>
               )}
             </div>
@@ -122,7 +109,7 @@ export const CustomerDetail: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Edit Button: icon only, removed 'Edit' text (Req 3) */}
+          {/* Edit Button: icon only */}
           <button
             onClick={() => setIsEditModalOpen(true)}
             className="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all active:scale-95 flex items-center justify-center"
@@ -135,14 +122,38 @@ export const CustomerDetail: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5">
-        {/* Customer Loyalty Points Card: Add Bill shifted near Send WhatsApp (Req 6) */}
+        {/* Celebration Offer Banner if Birthday or Anniversary is today or tomorrow */}
+        {celebration.isCelebrationActive && (
+          <div className="bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 rounded-2xl p-3.5 text-white shadow-md shadow-pink-500/15 flex items-center justify-between gap-3 animate-in fade-in">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl">
+                {celebration.celebrationType === 'combo' ? '🎉' : celebration.celebrationType === 'birthday' ? '🎂' : '💍'}
+              </span>
+              <div>
+                <h4 className="font-extrabold text-sm leading-tight">
+                  {celebration.badgeLabel}!
+                </h4>
+                <p className="text-[11px] text-pink-100 font-medium mt-0.5">
+                  Exclusive Offer: <strong>₹{celebration.discountAmount} OFF</strong> on min. purchase of ₹{celebration.minPurchase}.
+                </p>
+              </div>
+            </div>
+            <span className="text-[10px] uppercase tracking-wider font-extrabold bg-white/20 backdrop-blur-xs px-2.5 py-1 rounded-full shrink-0">
+              Active
+            </span>
+          </div>
+        )}
+
+        {/* Customer Loyalty Points Card: Add Bill shifted near Send WhatsApp */}
         {settings.enabled && (
           <CustomerLoyaltyCard
             customer={customer}
             settings={settings}
             businessName="Zewar For U by Bhakti"
+            latestTx={customerTx[0]}
             onOpenAdjustModal={() => setIsAdjustModalOpen(true)}
             onAddBillClick={() => setIsAddBillOpen(true)}
+            onWhatsAppSent={markWhatsAppSent}
           />
         )}
 

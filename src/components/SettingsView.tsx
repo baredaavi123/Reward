@@ -53,6 +53,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onBackToCustomers })
           <p>
             4. <strong>Reversal on Delete:</strong> Deleting a transaction automatically restores the exact points balance.
           </p>
+          <p>
+            5. <strong>Celebration Special Offers:</strong> On Birthday or Anniversary (highlighted across a 2-day window: the day before + actual day), send celebration wishes & coupon offers with 1 click directly without purchasing. On their purchase, choose manually to apply ₹100 OFF (min ₹800) or ₹250 OFF (min ₹1,000 for combo).
+          </p>
         </div>
       </div>
 

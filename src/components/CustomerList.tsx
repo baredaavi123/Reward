@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, UserPlus, Phone, ChevronRight } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { getCelebrationStatus } from '../utils/celebration';
 
 interface CustomerListProps {
   onAddCustomerClick: () => void;
@@ -28,27 +29,6 @@ export const CustomerList: React.FC<CustomerListProps> = ({ onAddCustomerClick }
       return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
     return dateStr;
-  };
-
-  // Requirement 3: Pink color box if customer has DOB or Anniversary today
-  const isTodayDate = (dateStr?: string) => {
-    if (!dateStr) return false;
-    const today = new Date();
-    const currentMonth = today.getMonth() + 1;
-    const currentDay = today.getDate();
-
-    if (dateStr.includes('-')) {
-      const parts = dateStr.split('-');
-      if (parts.length === 3) {
-        return parseInt(parts[1], 10) === currentMonth && parseInt(parts[2], 10) === currentDay;
-      }
-    } else if (dateStr.includes('/')) {
-      const parts = dateStr.split('/');
-      if (parts.length === 3) {
-        return parseInt(parts[1], 10) === currentMonth && parseInt(parts[0], 10) === currentDay;
-      }
-    }
-    return false;
   };
 
   return (
@@ -93,6 +73,7 @@ export const CustomerList: React.FC<CustomerListProps> = ({ onAddCustomerClick }
             const isSelected = customer.id === selectedCustomerId;
             const balance = customer.balance || 0;
             const phoneDisplay = cleanPhone(customer.phone);
+            const celebration = getCelebrationStatus(customer.dob, customer.anniversary);
 
             return (
               <div
@@ -125,29 +106,33 @@ export const CustomerList: React.FC<CustomerListProps> = ({ onAddCustomerClick }
                       </p>
                     )}
 
-                    {/* Dates: Rendered in pink box if today, no separate message (as requested) */}
+                    {/* Dates: Pink box if today OR tomorrow (2-day celebration window) */}
                     {(customer.dob || customer.anniversary) && (
                       <div className="flex flex-wrap items-center gap-1.5 text-[10px] mt-0.5">
                         {customer.dob && (
                           <span
                             className={
-                              isTodayDate(customer.dob)
+                              celebration.birthday.isActive
                                 ? 'bg-pink-100 text-pink-800 font-bold border border-pink-300 px-1.5 py-0.5 rounded shadow-2xs'
                                 : 'text-gray-400'
                             }
                           >
-                            DOB: {formatDateDisplay(customer.dob)}
+                            {celebration.birthday.isActive
+                              ? `🎂 Birthday ${celebration.birthday.timing === 'today' ? 'Today' : 'Tomorrow'}: ${celebration.birthday.formattedDisplay}`
+                              : `DOB: ${formatDateDisplay(customer.dob)}`}
                           </span>
                         )}
                         {customer.anniversary && (
                           <span
                             className={
-                              isTodayDate(customer.anniversary)
+                              celebration.anniversary.isActive
                                 ? 'bg-pink-100 text-pink-800 font-bold border border-pink-300 px-1.5 py-0.5 rounded shadow-2xs'
                                 : 'text-gray-400'
                             }
                           >
-                            Anniv: {formatDateDisplay(customer.anniversary)}
+                            {celebration.anniversary.isActive
+                              ? `💍 Anniv ${celebration.anniversary.timing === 'today' ? 'Today' : 'Tomorrow'}: ${celebration.anniversary.formattedDisplay}`
+                              : `Anniv: ${formatDateDisplay(customer.anniversary)}`}
                           </span>
                         )}
                       </div>

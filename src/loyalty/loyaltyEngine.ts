@@ -83,15 +83,22 @@ const EMOJI = {
   target: '\u{1F3AF}',         // 🎯
   celebrate: '\u{1F973}',      // 🥳
   tulip: '\u{1F337}',          // 🌷
+  cake: '\u{1F382}',           // 🎂
+  ring: '\u{1F48D}',           // 💍
+  bouquet: '\u{1F490}',        // 💐
+  card: '\u{1F4B3}',           // 💳
 };
 
 /**
- * Formats a ready-to-send WhatsApp notification message for the customer.
+ * Formats a ready-to-send WhatsApp notification message for the customer after a purchase or transaction.
  */
 export function formatWhatsAppLoyaltyMessage(params: {
   customerName: string;
   pointsEarned?: number;
   purchaseAmount?: number;
+  originalAmount?: number;
+  celebrationDiscountApplied?: number;
+  celebrationType?: 'birthday' | 'anniversary' | 'combo';
   oldPoints?: number;
   totalPoints: number;
   settings?: LoyaltySettings;
@@ -101,6 +108,9 @@ export function formatWhatsAppLoyaltyMessage(params: {
     customerName,
     pointsEarned = 0,
     purchaseAmount = 0,
+    originalAmount,
+    celebrationDiscountApplied = 0,
+    celebrationType,
     totalPoints,
     settings = DEFAULT_LOYALTY_SETTINGS,
     businessName = 'Zewar For U by Bhakti',
@@ -118,11 +128,36 @@ export function formatWhatsAppLoyaltyMessage(params: {
   let message = `${EMOJI.sparkles} Thank you, *${customerName}*, for shopping with *${businessName}*! ${EMOJI.hearts}\n\n`;
 
   if (purchaseAmount > 0) {
-    const formattedAmount = purchaseAmount.toLocaleString('en-IN', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    });
-    message += `${EMOJI.bags} *Purchase Amount:* ₹${formattedAmount}\n`;
+    if (celebrationDiscountApplied > 0 && originalAmount) {
+      const formattedOrig = originalAmount.toLocaleString('en-IN', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      });
+      const formattedDisc = celebrationDiscountApplied.toLocaleString('en-IN', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      });
+      const formattedNet = purchaseAmount.toLocaleString('en-IN', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      });
+      const label =
+        celebrationType === 'combo'
+          ? `${EMOJI.party} *Double Celebration Offer:* -₹${formattedDisc}`
+          : celebrationType === 'birthday'
+          ? `${EMOJI.cake} *Birthday Special Gift:* -₹${formattedDisc}`
+          : `${EMOJI.ring} *Anniversary Special Gift:* -₹${formattedDisc}`;
+
+      message += `${EMOJI.bags} *Purchase Amount:* ₹${formattedOrig}\n`;
+      message += `${label}\n`;
+      message += `${EMOJI.card} *Net Amount Paid:* ₹${formattedNet}\n`;
+    } else {
+      const formattedAmount = purchaseAmount.toLocaleString('en-IN', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      });
+      message += `${EMOJI.bags} *Purchase Amount:* ₹${formattedAmount}\n`;
+    }
   }
 
   if (pointsEarned > 0) {
@@ -151,6 +186,73 @@ export function formatWhatsAppLoyaltyMessage(params: {
   message += `With love,\n*${businessName}* ${EMOJI.tulip}`;
 
   return message;
+}
+
+/**
+ * Formats a WhatsApp celebration greeting & special invitation offer message
+ * sent directly to the customer (even without making any purchase).
+ */
+export function formatWhatsAppCelebrationWishMessage(params: {
+  customerName: string;
+  celebrationType: 'birthday' | 'anniversary' | 'combo';
+  timing?: 'today' | 'tomorrow';
+  businessName?: string;
+}): string {
+  const {
+    customerName,
+    celebrationType,
+    timing = 'today',
+    businessName = 'Zewar For U by Bhakti',
+  } = params;
+
+  const isTomorrow = timing === 'tomorrow';
+
+  if (celebrationType === 'combo') {
+    const greetingHeader = isTomorrow
+      ? `${EMOJI.party} *Advance Happy Birthday & Anniversary, ${customerName}!* ${EMOJI.cake}${EMOJI.ring}`
+      : `${EMOJI.party} *Double Celebration! Happy Birthday & Anniversary, ${customerName}!* ${EMOJI.celebrate}${EMOJI.cake}${EMOJI.ring}`;
+    const validity = isTomorrow ? 'valid today and tomorrow' : 'valid today';
+
+    return (
+      `${greetingHeader}\n\n` +
+      `Warmest wishes on your incredible milestone from *${businessName}*! ${EMOJI.hearts}\n\n` +
+      `${EMOJI.gift} *YOUR EXCLUSIVE BUMPER GIFT*\n` +
+      `Enjoy a flat *₹250 OFF* on your shopping purchase of ₹1,000 or more ${validity}! ${EMOJI.diamond}${EMOJI.sparkles}\n\n` +
+      `Visit our store to celebrate and treat yourself! ${EMOJI.bags}${EMOJI.tulip}\n\n` +
+      `With love,\n*${businessName}* ${EMOJI.tulip}`
+    );
+  }
+
+  if (celebrationType === 'birthday') {
+    const greetingHeader = isTomorrow
+      ? `${EMOJI.cake} *Advance Birthday Wishes, ${customerName}!* ${EMOJI.party}`
+      : `${EMOJI.cake} *Happy Birthday, ${customerName}!* ${EMOJI.party}`;
+    const validity = isTomorrow ? 'valid today and tomorrow' : 'valid today';
+
+    return (
+      `${greetingHeader}\n\n` +
+      `Warmest wishes on your special day from *${businessName}*! ${EMOJI.hearts}\n\n` +
+      `${EMOJI.gift} *YOUR EXCLUSIVE BIRTHDAY GIFT*\n` +
+      `Enjoy an exclusive flat *₹100 OFF* on your shopping purchase of ₹800 or more ${validity}! ${EMOJI.sparkles}\n\n` +
+      `Visit our store and celebrate your special day in style. ${EMOJI.bags}${EMOJI.tulip}\n\n` +
+      `With love,\n*${businessName}* ${EMOJI.tulip}`
+    );
+  }
+
+  // Anniversary
+  const greetingHeader = isTomorrow
+    ? `${EMOJI.ring} *Advance Anniversary Wishes, ${customerName}!* ${EMOJI.hearts}`
+    : `${EMOJI.ring} *Happy Anniversary, ${customerName}!* ${EMOJI.hearts}`;
+  const validity = isTomorrow ? 'valid today and tomorrow' : 'valid today';
+
+  return (
+    `${greetingHeader}\n\n` +
+    `Warmest congratulations on your milestone from *${businessName}*! ${EMOJI.sparkles}\n\n` +
+    `${EMOJI.gift} *YOUR EXCLUSIVE ANNIVERSARY GIFT*\n` +
+    `Enjoy an exclusive flat *₹100 OFF* on your shopping purchase of ₹800 or more ${validity}! ${EMOJI.bouquet}\n\n` +
+    `Visit our store to celebrate your special milestone! ${EMOJI.bags}${EMOJI.tulip}\n\n` +
+    `With love,\n*${businessName}* ${EMOJI.tulip}`
+  );
 }
 
 /**

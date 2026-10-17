@@ -22,6 +22,9 @@ export interface LoyaltyCustomer {
   balance?: number; // Net khata balance
   loyaltyPoints: number; // Current accumulated points balance
   createdAt?: string;
+  lastWhatsAppSentAt?: string; // Timestamp of last WhatsApp message sent
+  lastWhatsAppSentType?: 'purchase' | 'celebration';
+  lastWhatsAppTxId?: string; // ID of the transaction receipt sent
 }
 
 export interface LoyaltyTransaction {
@@ -33,6 +36,9 @@ export interface LoyaltyTransaction {
   description?: string;
   pointsEarned?: number;
   pointsRedeemed?: number;
+  originalAmount?: number; // Pre-discount purchase amount
+  celebrationDiscountApplied?: number; // Special offer discount (₹100 or ₹250)
+  celebrationType?: 'birthday' | 'anniversary' | 'combo';
 }
 
 export interface LoyaltyManualAdjustment {

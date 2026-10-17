@@ -23,15 +23,19 @@ interface AppContextType {
   addTransaction: (params: {
     customerId: string;
     amount: number;
+    originalAmount?: number;
     type: 'debit' | 'credit';
     description?: string;
     pointsRedeemed?: number;
     discountApplied?: number;
-  }) => void;
+    celebrationDiscountApplied?: number;
+    celebrationType?: 'birthday' | 'anniversary' | 'combo';
+  }) => LoyaltyTransaction;
   deleteTransaction: (id: string) => void;
   adjustCustomerPoints: (customerId: string, newPoints: number, reason: string) => void;
   updateSettings: (newSettings: LoyaltySettings) => void;
   clearAllData: () => void;
+  markWhatsAppSent: (customerId: string, type: 'purchase' | 'celebration', txId?: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -85,29 +89,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addTransaction = (params: {
     customerId: string;
     amount: number;
+    originalAmount?: number;
     type: 'debit' | 'credit';
     description?: string;
     pointsRedeemed?: number;
     discountApplied?: number;
-  }) => {
-    const { customerId, amount, type, description, pointsRedeemed = 0, discountApplied = 0 } = params;
+    celebrationDiscountApplied?: number;
+    celebrationType?: 'birthday' | 'anniversary' | 'combo';
+  }): LoyaltyTransaction => {
+    const {
+      customerId,
+      amount,
+      originalAmount,
+      type,
+      description,
+      pointsRedeemed = 0,
+      discountApplied = 0,
+      celebrationDiscountApplied = 0,
+      celebrationType,
+    } = params;
 
-    // Calculate points earned on debit purchase
+    // Net financial debit after any loyalty points discount & celebration discount
+    const totalDiscount = discountApplied + celebrationDiscountApplied;
+    const netAmount = type === 'debit' ? Math.max(0, amount - totalDiscount) : amount;
+
+    // Calculate points earned on debit purchase based on net paid amount
     const pointsEarned =
-      type === 'debit' && settings.enabled ? calculatePointsEarned(amount, settings) : 0;
-
-    // Net financial debit after any loyalty points discount
-    const netAmount = type === 'debit' ? Math.max(0, amount - discountApplied) : amount;
+      type === 'debit' && settings.enabled ? calculatePointsEarned(netAmount, settings) : 0;
 
     const newTx: LoyaltyTransaction = {
       id: `tx-${Date.now()}`,
       customerId,
       amount: netAmount,
+      originalAmount: originalAmount || amount,
       type,
       date: new Date().toISOString(),
       description: description?.trim() || (type === 'debit' ? 'You Gave / Purchase' : 'You Got / Payment'),
       pointsEarned,
       pointsRedeemed,
+      celebrationDiscountApplied,
+      celebrationType,
     };
 
     setTransactions((prev) => [newTx, ...prev]);
@@ -130,6 +151,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         };
       })
     );
+
+    return newTx;
   };
 
   const deleteTransaction = (id: string) => {
@@ -191,6 +214,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     clearAllStorageData();
   };
 
+  const markWhatsAppSent = (
+    customerId: string,
+    type: 'purchase' | 'celebration',
+    txId?: string
+  ) => {
+    setCustomers((prev) =>
+      prev.map((c) =>
+        c.id === customerId
+          ? {
+              ...c,
+              lastWhatsAppSentAt: new Date().toISOString(),
+              lastWhatsAppSentType: type,
+              lastWhatsAppTxId: txId || c.lastWhatsAppTxId,
+            }
+          : c
+      )
+    );
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -207,6 +249,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         adjustCustomerPoints,
         updateSettings,
         clearAllData,
+        markWhatsAppSent,
       }}
     >
       {children}
