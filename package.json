@@ -7,10 +7,12 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:ios": "tsc -b && vite build && npx cap sync ios",
+    "build:apk": "npm run build && npx cap sync android && cd android && gradlew assembleDebug && cd .. && copy android\\app\\build\\outputs\\apk\\debug\\app-debug.apk Reward.apk",
     "cap:sync": "npx cap sync",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
     "@capacitor/cli": "^8.5.3",
     "@capacitor/core": "^8.5.3",
     "@capacitor/ios": "^8.5.3",

@@ -44,13 +44,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess, correctPin 
         <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-white p-3 shadow-xl shadow-amber-500/10 border-2 border-amber-100 flex items-center justify-center mb-4 transition-transform hover:scale-105">
           <img
             src={logoUrl}
-            alt="Zewar For You"
+            alt="Zewar For U by Bhakti"
             className="w-full h-full object-contain"
           />
         </div>
 
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-          Zewar For You
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight text-center">
+          Zewar For U by Bhakti
         </h1>
         <p className="text-xs sm:text-sm font-medium text-gray-500 mt-1">
           Reward Loyalty Portal

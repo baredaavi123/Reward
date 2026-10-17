@@ -29,7 +29,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, onLogou
           />
           <div>
             <h1 className="font-extrabold text-gray-900 text-sm tracking-tight leading-tight">
-              Zewar For You
+              Zewar For U by Bhakti
             </h1>
             <p className="text-[10px] text-gray-400 flex items-center gap-1">
               <span>{customers.length} Clients</span>

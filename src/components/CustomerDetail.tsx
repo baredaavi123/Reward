@@ -140,7 +140,7 @@ export const CustomerDetail: React.FC = () => {
           <CustomerLoyaltyCard
             customer={customer}
             settings={settings}
-            businessName="Zewar For You"
+            businessName="Zewar For U by Bhakti"
             onOpenAdjustModal={() => setIsAdjustModalOpen(true)}
             onAddBillClick={() => setIsAddBillOpen(true)}
           />

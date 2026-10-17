@@ -84,29 +84,54 @@ export function formatWhatsAppLoyaltyMessage(params: {
     customerName,
     pointsEarned = 0,
     purchaseAmount = 0,
-    oldPoints = 0,
     totalPoints,
     settings = DEFAULT_LOYALTY_SETTINGS,
-    businessName = 'Zewar For You',
+    businessName = 'Zewar For U by Bhakti',
   } = params;
 
-  const redemptionValue = totalPoints * (settings.redemptionRate || 80);
-  const formattedAmount = purchaseAmount.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-  const pointsLabel = pointsEarned === 1 ? '1 REWARD POINT' : `${pointsEarned} REWARD POINTS`;
+  const targetPoints = settings.minPointsToRedeem || 5;
+  const rewardValue = targetPoints * (settings.redemptionRate || 80);
+  const remainingPoints = Math.max(0, targetPoints - totalPoints);
 
-  let message = `Namaste ${customerName},\n\n`;
+  // Generate visual progress bar (e.g. [ ⭐ ⭐ ⭐ ⚪ ⚪ ])
+  const filledStars = Math.min(targetPoints, Math.max(0, totalPoints));
+  const emptyStars = Math.max(0, targetPoints - filledStars);
+  const progressBar = `${'⭐ '.repeat(filledStars)}${'⚪ '.repeat(emptyStars)}`.trim();
 
-  if (pointsEarned > 0) {
-    message += `🎉 *YOU GOT ${pointsLabel}* against your purchase of ₹${formattedAmount} at *${businessName}*!\n\n`;
-    message += `⭐ *Total Points Balance:* ${totalPoints} Point (${oldPoints} + ${pointsEarned})\n`;
-  } else {
-    message += `Thank you for your purchase of ₹${formattedAmount} at *${businessName}*!\n\n`;
-    message += `⭐ *Total Points Balance:* ${totalPoints} Point\n`;
+  let message = `✨ Thank you, *${customerName}*, for shopping with *${businessName}*! 💕\n\n`;
+
+  if (purchaseAmount > 0) {
+    const formattedAmount = purchaseAmount.toLocaleString('en-IN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
+    message += `🛍️ *Purchase Amount:* ₹${formattedAmount}\n`;
   }
 
-  message +=
-    `💰 *Redeemable Value:* ₹${redemptionValue.toLocaleString('en-IN', { minimumFractionDigits: 0 })} (Discount on next purchase)\n\n` +
-    `Thank you for shopping with us! 🙏`;
+  if (pointsEarned > 0) {
+    const pointsLabel = pointsEarned === 1 ? '1 Reward Point' : `${pointsEarned} Reward Points`;
+    message += `🎉 *Points Earned Today:* +${pointsLabel}\n\n`;
+  } else if (purchaseAmount > 0) {
+    message += `\n`;
+  }
+
+  message += `💎 *YOUR LOYALTY CARD*\n`;
+  message += `⭐ *Current Balance:* ${totalPoints} / ${targetPoints} Points\n`;
+  message += `📊 *Progress:* [ ${progressBar} ]\n\n`;
+
+  if (totalPoints >= targetPoints) {
+    const currentRedeemValue = totalPoints * (settings.redemptionRate || 80);
+    message += `🎉 *CONGRATULATIONS!* 🥳\n`;
+    message += `🎁 *Your ₹${currentRedeemValue.toLocaleString('en-IN')} Shopping Reward is UNLOCKED!*\n`;
+    message += `You can redeem this discount directly on your next purchase! 💎✨\n\n`;
+  } else {
+    const pointsWord = remainingPoints === 1 ? 'point' : 'points';
+    message += `🎁 Collect all ${targetPoints} points to unlock an exclusive *₹${rewardValue} Shopping Reward!* 💝\n`;
+    message += `🎯 *Only ${remainingPoints} more ${pointsWord}* to unlock your reward!\n\n`;
+  }
+
+  message += `Keep shopping, keep earning! 🛍️✨\n\n`;
+  message += `With love,\n*${businessName}* 🌷`;
 
   return message;
 }

@@ -63,7 +63,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         oldPoints: currentPoints,
         totalPoints: newPointsTotal,
         settings,
-        businessName: 'Zewar For You',
+        businessName: 'Zewar For U by Bhakti',
       });
 
       openWhatsAppChat(customer.phone, message);

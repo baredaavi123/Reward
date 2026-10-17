@@ -14,7 +14,7 @@ interface CustomerLoyaltyCardProps {
 export const CustomerLoyaltyCard: React.FC<CustomerLoyaltyCardProps> = ({
   customer,
   settings,
-  businessName = 'Zewar For You',
+  businessName = 'Zewar For U by Bhakti',
   onOpenAdjustModal,
   onAddBillClick,
 }) => {
