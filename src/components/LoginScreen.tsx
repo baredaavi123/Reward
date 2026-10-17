@@ -18,7 +18,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess, correctPin 
       setError(false);
 
       if (nextPin.length === 4) {
-        if (nextPin === correctPin || nextPin === '1234') {
+        if (nextPin === correctPin) {
           setTimeout(() => {
             onSuccess();
           }, 150);
@@ -85,7 +85,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess, correctPin 
             Incorrect PIN. Please try again.
           </p>
         )}
-        <p className="text-[11px] text-gray-400 mt-2">Default PIN: 1234</p>
       </div>
 
       {/* Number Keypad */}

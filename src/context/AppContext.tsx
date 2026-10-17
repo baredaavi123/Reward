@@ -5,9 +5,11 @@ import {
   loadStoredCustomers,
   loadStoredSettings,
   loadStoredTransactions,
+  loadStoredPin,
   saveStoredCustomers,
   saveStoredSettings,
   saveStoredTransactions,
+  saveStoredPin,
   clearAllStorageData,
 } from '../utils/storage';
 
@@ -36,6 +38,8 @@ interface AppContextType {
   updateSettings: (newSettings: LoyaltySettings) => void;
   clearAllData: () => void;
   markWhatsAppSent: (customerId: string, type: 'purchase' | 'celebration', txId?: string) => void;
+  pin: string;
+  updatePin: (newPin: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -44,7 +48,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [customers, setCustomers] = useState<LoyaltyCustomer[]>(loadStoredCustomers);
   const [transactions, setTransactions] = useState<LoyaltyTransaction[]>(loadStoredTransactions);
   const [settings, setSettings] = useState<LoyaltySettings>(loadStoredSettings);
+  const [pin, setPin] = useState<string>(loadStoredPin);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+
+  const updatePin = (newPin: string) => {
+    setPin(newPin);
+    saveStoredPin(newPin);
+  };
 
   // Sync to local storage
   useEffect(() => {
@@ -250,6 +260,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateSettings,
         clearAllData,
         markWhatsAppSent,
+        pin,
+        updatePin,
       }}
     >
       {children}

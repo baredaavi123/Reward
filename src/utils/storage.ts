@@ -5,7 +5,24 @@ const STORAGE_KEYS = {
   CUSTOMERS: 'reward_customers',
   TRANSACTIONS: 'reward_transactions',
   SETTINGS: 'reward_settings',
+  PIN: 'reward_security_pin',
 };
+
+export function loadStoredPin(): string {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.PIN) || '1234';
+  } catch {
+    return '1234';
+  }
+}
+
+export function saveStoredPin(pin: string): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.PIN, pin);
+  } catch {
+    // Ignore storage errors
+  }
+}
 
 export function loadStoredSettings(): LoyaltySettings {
   try {

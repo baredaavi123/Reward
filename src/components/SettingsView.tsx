@@ -1,14 +1,52 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { RewardSettingsCard } from '../loyalty/components/RewardSettingsCard';
-import { BookOpen, ArrowLeft, Trash2 } from 'lucide-react';
+import { BookOpen, ArrowLeft, Trash2, Lock, KeyRound, Check } from 'lucide-react';
 
 interface SettingsViewProps {
   onBackToCustomers?: () => void;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({ onBackToCustomers }) => {
-  const { settings, updateSettings, clearAllData } = useApp();
+  const { settings, updateSettings, clearAllData, pin, updatePin } = useApp();
+
+  const [isChangingPin, setIsChangingPin] = useState(false);
+  const [currentPinInput, setCurrentPinInput] = useState('');
+  const [newPinInput, setNewPinInput] = useState('');
+  const [confirmPinInput, setConfirmPinInput] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [pinSuccess, setPinSuccess] = useState('');
+
+  const handleChangePinSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPinError('');
+    setPinSuccess('');
+
+    if (currentPinInput !== pin) {
+      setPinError('Current PIN is incorrect.');
+      return;
+    }
+    if (newPinInput.length !== 4) {
+      setPinError('New PIN must be exactly 4 digits.');
+      return;
+    }
+    if (!/^\d{4}$/.test(newPinInput)) {
+      setPinError('New PIN must contain numbers only.');
+      return;
+    }
+    if (newPinInput !== confirmPinInput) {
+      setPinError('New PIN and Confirm PIN do not match.');
+      return;
+    }
+
+    updatePin(newPinInput);
+    setIsChangingPin(false);
+    setCurrentPinInput('');
+    setNewPinInput('');
+    setConfirmPinInput('');
+    setPinSuccess('Security PIN has been updated successfully!');
+    setTimeout(() => setPinSuccess(''), 4000);
+  };
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -33,6 +71,128 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onBackToCustomers })
 
       {/* Main Reward Settings Card */}
       <RewardSettingsCard settings={settings} onChange={updateSettings} />
+
+      {/* Security PIN Settings */}
+      <div className="bg-white rounded-2xl border border-gray-200/80 p-5 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center shrink-0">
+              <Lock className="w-5 h-5 text-amber-700" />
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-900 text-sm flex items-center gap-2">
+                Security PIN Protection
+              </h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Set a 4-digit PIN to secure your Reward app on startup.
+              </p>
+            </div>
+          </div>
+          {!isChangingPin && (
+            <button
+              onClick={() => {
+                setIsChangingPin(true);
+                setPinError('');
+                setPinSuccess('');
+                setCurrentPinInput('');
+                setNewPinInput('');
+                setConfirmPinInput('');
+              }}
+              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 shrink-0"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              Change PIN
+            </button>
+          )}
+        </div>
+
+        {pinSuccess && (
+          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-fade-in">
+            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{pinSuccess}</span>
+          </div>
+        )}
+
+        {isChangingPin && (
+          <form
+            onSubmit={handleChangePinSubmit}
+            className="pt-3 border-t border-gray-100 space-y-3.5 animate-fade-in"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Current PIN
+                </label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={currentPinInput}
+                  onChange={(e) => setCurrentPinInput(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  placeholder="Current PIN"
+                  className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-widest text-center"
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  New 4-Digit PIN
+                </label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={newPinInput}
+                  onChange={(e) => setNewPinInput(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  placeholder="New PIN"
+                  className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-widest text-center"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Confirm New PIN
+                </label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={confirmPinInput}
+                  onChange={(e) => setConfirmPinInput(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  placeholder="Confirm PIN"
+                  className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono tracking-widest text-center"
+                />
+              </div>
+            </div>
+
+            {pinError && (
+              <p className="text-xs font-semibold text-rose-600 animate-shake">
+                {pinError}
+              </p>
+            )}
+
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsChangingPin(false);
+                  setPinError('');
+                }}
+                className="px-3.5 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95"
+              >
+                Save New PIN
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
 
       {/* How it works note */}
       <div className="bg-white rounded-2xl border border-gray-200/80 p-5 space-y-3">

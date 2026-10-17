@@ -11,14 +11,14 @@ const AppContent: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<'customers' | 'settings'>('customers');
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
-  const { selectedCustomerId } = useApp();
+  const { selectedCustomerId, pin } = useApp();
 
-  // 1. Show Login Screen on Start (PIN: 1234)
+  // 1. Show Login Screen on Start
   if (!isAuthenticated) {
     return (
       <LoginScreen
         onSuccess={() => setIsAuthenticated(true)}
-        correctPin="1234"
+        correctPin={pin}
       />
     );
   }
