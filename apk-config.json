@@ -2,7 +2,7 @@
   "appName": "Reward",
   "packageId": "com.zewarforyou.reward",
   "versionName": "1.0.1",
-  "versionCode": 4,
+  "versionCode": 6,
   "icon": "src/assets/Logo.png",
   "orientation": "portrait",
   "fullscreen": false,
