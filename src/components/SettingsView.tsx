@@ -56,16 +56,22 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onBackToCustomers })
         </div>
       </div>
 
-      {/* Powered by VYOMWEB */}
+      {/* Powered by VYOMWEB & Version */}
       <div className="bg-white rounded-2xl border border-gray-200/80 p-4 text-center shadow-xs">
-        <p className="text-xs font-semibold text-gray-700 tracking-wide">
-          Powered by <span className="text-amber-600 font-bold">VYOMWEB</span>,{' '}
-          <a
-            href="tel:9826299324"
-            className="hover:text-amber-600 hover:underline transition-colors font-medium text-gray-800"
-          >
-            9826299324
-          </a>
+        <p className="text-xs font-semibold text-gray-700 tracking-wide flex items-center justify-center flex-wrap gap-x-2 gap-y-1">
+          <span>
+            Powered by <span className="text-amber-600 font-bold">VYOMWEB</span>,{' '}
+            <a
+              href="tel:9826299324"
+              className="hover:text-amber-600 hover:underline transition-colors font-medium text-gray-800"
+            >
+              9826299324
+            </a>
+          </span>
+          <span className="text-gray-300 hidden sm:inline">•</span>
+          <span className="text-[11px] font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+            Version 1.0.1
+          </span>
         </p>
       </div>
     </div>
