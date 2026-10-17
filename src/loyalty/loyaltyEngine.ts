@@ -68,6 +68,23 @@ export function validatePointsRedemption(
   return { valid: true };
 }
 
+// Unicode emoji constants ensure 100% encoding safety across all platforms & bundlers
+const EMOJI = {
+  sparkles: '\u{2728}',       // ✨
+  hearts: '\u{1F495}',         // 💕
+  bags: '\u{1F6CD}\u{FE0F}',   // 🛍️
+  party: '\u{1F389}',          // 🎉
+  diamond: '\u{1F48E}',        // 💎
+  star: '\u{2B50}',            // ⭐
+  whiteCircle: '\u{26AA}',     // ⚪
+  chart: '\u{1F4CA}',          // 📊
+  gift: '\u{1F381}',           // 🎁
+  ribbonHeart: '\u{1F49D}',    // 💝
+  target: '\u{1F3AF}',         // 🎯
+  celebrate: '\u{1F973}',      // 🥳
+  tulip: '\u{1F337}',          // 🌷
+};
+
 /**
  * Formats a ready-to-send WhatsApp notification message for the customer.
  */
@@ -96,58 +113,59 @@ export function formatWhatsAppLoyaltyMessage(params: {
   // Generate visual progress bar (e.g. [ ⭐ ⭐ ⭐ ⚪ ⚪ ])
   const filledStars = Math.min(targetPoints, Math.max(0, totalPoints));
   const emptyStars = Math.max(0, targetPoints - filledStars);
-  const progressBar = `${'⭐ '.repeat(filledStars)}${'⚪ '.repeat(emptyStars)}`.trim();
+  const progressBar = `${(EMOJI.star + ' ').repeat(filledStars)}${(EMOJI.whiteCircle + ' ').repeat(emptyStars)}`.trim();
 
-  let message = `✨ Thank you, *${customerName}*, for shopping with *${businessName}*! 💕\n\n`;
+  let message = `${EMOJI.sparkles} Thank you, *${customerName}*, for shopping with *${businessName}*! ${EMOJI.hearts}\n\n`;
 
   if (purchaseAmount > 0) {
     const formattedAmount = purchaseAmount.toLocaleString('en-IN', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     });
-    message += `🛍️ *Purchase Amount:* ₹${formattedAmount}\n`;
+    message += `${EMOJI.bags} *Purchase Amount:* ₹${formattedAmount}\n`;
   }
 
   if (pointsEarned > 0) {
     const pointsLabel = pointsEarned === 1 ? '1 Reward Point' : `${pointsEarned} Reward Points`;
-    message += `🎉 *Points Earned Today:* +${pointsLabel}\n\n`;
+    message += `${EMOJI.party} *Points Earned Today:* +${pointsLabel}\n\n`;
   } else if (purchaseAmount > 0) {
     message += `\n`;
   }
 
-  message += `💎 *YOUR LOYALTY CARD*\n`;
-  message += `⭐ *Current Balance:* ${totalPoints} / ${targetPoints} Points\n`;
-  message += `📊 *Progress:* [ ${progressBar} ]\n\n`;
+  message += `${EMOJI.diamond} *YOUR LOYALTY CARD*\n`;
+  message += `${EMOJI.star} *Current Balance:* ${totalPoints} / ${targetPoints} Points\n`;
+  message += `${EMOJI.chart} *Progress:* [ ${progressBar} ]\n\n`;
 
   if (totalPoints >= targetPoints) {
     const currentRedeemValue = totalPoints * (settings.redemptionRate || 80);
-    message += `🎉 *CONGRATULATIONS!* 🥳\n`;
-    message += `🎁 *Your ₹${currentRedeemValue.toLocaleString('en-IN')} Shopping Reward is UNLOCKED!*\n`;
-    message += `You can redeem this discount directly on your next purchase! 💎✨\n\n`;
+    message += `${EMOJI.party} *CONGRATULATIONS!* ${EMOJI.celebrate}\n`;
+    message += `${EMOJI.gift} *Your ₹${currentRedeemValue.toLocaleString('en-IN')} Shopping Reward is UNLOCKED!*\n`;
+    message += `You can redeem this discount directly on your next purchase! ${EMOJI.diamond}${EMOJI.sparkles}\n\n`;
   } else {
     const pointsWord = remainingPoints === 1 ? 'point' : 'points';
-    message += `🎁 Collect all ${targetPoints} points to unlock an exclusive *₹${rewardValue} Shopping Reward!* 💝\n`;
-    message += `🎯 *Only ${remainingPoints} more ${pointsWord}* to unlock your reward!\n\n`;
+    message += `${EMOJI.gift} Collect all ${targetPoints} points to unlock an exclusive *₹${rewardValue} Shopping Reward!* ${EMOJI.ribbonHeart}\n`;
+    message += `${EMOJI.target} *Only ${remainingPoints} more ${pointsWord}* to unlock your reward!\n\n`;
   }
 
-  message += `Keep shopping, keep earning! 🛍️✨\n\n`;
-  message += `With love,\n*${businessName}* 🌷`;
+  message += `Keep shopping, keep earning! ${EMOJI.bags}${EMOJI.sparkles}\n\n`;
+  message += `With love,\n*${businessName}* ${EMOJI.tulip}`;
 
   return message;
 }
 
 /**
  * Opens WhatsApp directly with customer phone number and encoded message text.
+ * Uses https://api.whatsapp.com/send to prevent URL emoji corruption that occurs with wa.me redirects.
  */
 export function openWhatsAppChat(phone?: string, text: string = ''): void {
   const cleanPhone = (phone || '').replace(/\D/g, '');
   const encodedText = encodeURIComponent(text);
 
   if (!cleanPhone) {
-    window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+    window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
     return;
   }
 
   const phoneWithCountry = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
-  window.open(`https://wa.me/${phoneWithCountry}?text=${encodedText}`, '_blank');
+  window.open(`https://api.whatsapp.com/send?phone=${phoneWithCountry}&text=${encodedText}`, '_blank');
 }

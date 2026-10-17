@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { RewardSettingsCard } from '../loyalty/components/RewardSettingsCard';
-import { ShieldCheck, BookOpen, ArrowLeft } from 'lucide-react';
+import { BookOpen, ArrowLeft } from 'lucide-react';
 
 interface SettingsViewProps {
   onBackToCustomers?: () => void;
@@ -56,15 +56,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ onBackToCustomers })
         </div>
       </div>
 
-      {/* Standalone Module Notice */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200/80 p-5 flex items-start gap-3">
-        <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-        <div className="text-xs text-blue-950">
-          <p className="font-bold">Standalone Modular Copy Ready for Any Customer</p>
-          <p className="mt-1 text-blue-900/80 leading-relaxed">
-            This module is 100% self-contained in <code>src/loyalty/</code>. To deliver this feature to any client, simply copy the <code>src/loyalty</code> folder into their codebase and follow the instructions in <code>INTEGRATION_GUIDE.md</code>.
-          </p>
-        </div>
+      {/* Powered by VYOMWEB */}
+      <div className="bg-white rounded-2xl border border-gray-200/80 p-4 text-center shadow-xs">
+        <p className="text-xs font-semibold text-gray-700 tracking-wide">
+          Powered by <span className="text-amber-600 font-bold">VYOMWEB</span>,{' '}
+          <a
+            href="tel:9826299324"
+            className="hover:text-amber-600 hover:underline transition-colors font-medium text-gray-800"
+          >
+            9826299324
+          </a>
+        </p>
       </div>
     </div>
   );
