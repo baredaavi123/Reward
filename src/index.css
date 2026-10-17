@@ -7,3 +7,11 @@
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   }
 }
+
+.pin-masked {
+  -webkit-text-security: disc;
+}
+
+.pin-visible {
+  -webkit-text-security: none;
+}
